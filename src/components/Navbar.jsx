@@ -2,7 +2,7 @@ import React from 'react';
 
 const Navbar = ({ userRole, setSection }) => {
   return (
-    <nav className="flex justify-between items-center p-6 bg-white shadow-sm">
+    <nav className="flex flex-col sm:flex-row justify-between items-center p-4 sm:p-6 bg-white shadow-sm">
       {/* Паспорта слева */}
       <div>
         <span

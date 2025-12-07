@@ -72,6 +72,8 @@ body {
     border-radius: 8px;
     padding: 10px 16px;
     cursor: pointer;
+    margin-left: 20px;
+    margin-top: 20px;
   }
   
   button:hover {
@@ -93,4 +95,12 @@ body {
     top: 0;
     background-color: #f0f0f0;
   }
-  
+
+  h1 {
+    margin: 20px;
+  }
+
+  table {
+    margin-left: 20px;
+    margin-right: 20px;
+  }

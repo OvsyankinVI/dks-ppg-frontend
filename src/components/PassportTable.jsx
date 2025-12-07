@@ -26,7 +26,7 @@ export default function PassportTable() {
 
   return (
     <div>
-      <h2>Паспорта — Компрессор</h2>
+
       <table>
         <thead>
           <tr>
@@ -46,10 +46,9 @@ export default function PassportTable() {
           ))}
         </tbody>
       </table>
-
       <button onClick={addRow}>Добавить строку</button>
       <button onClick={createPassports}>Создать паспорта (PDF + DOCX)</button>
-      <p>* — обязательные поля</p>
+
     </div>
   );
 }
