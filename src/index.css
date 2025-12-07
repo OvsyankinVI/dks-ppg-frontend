@@ -104,3 +104,12 @@ body {
     margin-left: 20px;
     margin-right: 20px;
   }
+
+  dive {
+    margin: 200px;
+    background-color: aliceblue;
+  }
+h2 {
+  margin: 15px;
+  margin-left: 100px;
+}

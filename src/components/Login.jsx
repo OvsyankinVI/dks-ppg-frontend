@@ -18,7 +18,7 @@ export default function Login({ onLogin }) {
 
   return (
     <div>
-      <h2>Вход</h2>
+      <h2>Авторизация</h2>
       <input placeholder="Логин" value={username} onChange={e=>setUsername(e.target.value)} />
       <input placeholder="Пароль" type="password" value={password} onChange={e=>setPassword(e.target.value)} />
       <button onClick={submit}>Войти</button>
