@@ -17,9 +17,8 @@ export default function PassportTable() {
 
   const createPassports = () => {
     rows.forEach(row => {
-      const filename = `Компрессор_${row.serial || Math.random().toString(36).slice(2,8)}`;
-      const data = { type: 'Компрессор', ...row };
-      generatePDF(data, filename);
+      const filename = `Паспорт_${row.serial || Math.random().toString(36).slice(2,8)}`;
+      const data = { type: 'Паспорт', ...row };
       generateDOCX(data, filename);
     });
   };
@@ -47,7 +46,7 @@ export default function PassportTable() {
         </tbody>
       </table>
       <button onClick={addRow}>Добавить строку</button>
-      <button onClick={createPassports}>Создать паспорта (PDF + DOCX)</button>
+      <button onClick={createPassports}>Создать паспорта</button>
 
     </div>
   );
