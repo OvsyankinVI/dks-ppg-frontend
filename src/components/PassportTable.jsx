@@ -80,7 +80,7 @@ export default function PassportTable() {
 
       {/* Верхние кнопки */}
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-        <h2>Паспортная система</h2>
+        
 
         <button onClick={toggleSelectMode}>
           {selectMode ? "Скрыть выбор" : "Выбрать паспорта"}
