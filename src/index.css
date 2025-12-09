@@ -20,15 +20,7 @@ body {
     padding: 20px;
     margin-bottom: 20px;
   }
-  
-  button {
-    background-color: #0055ff;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 16px;
-    cursor: pointer;
-  }
+
   
   button:hover {
     background-color: #0041cc;
@@ -57,16 +49,8 @@ body {
     margin: 0;
   }
   
-  .card {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    padding: 20px;
-    margin-bottom: 20px;
-  }
-  
   button {
-    background-color: #0055ff;
+    background-color: #3b79f5;
     color: white;
     border: none;
     border-radius: 8px;
@@ -94,22 +78,26 @@ body {
     position: sticky;
     top: 0;
     background-color: #f0f0f0;
+    max-width: 10px;   /* максимальная ширина ячейки */
+    word-wrap: break-word; /* перенос длинного текста на новую строку */
+    padding: 4px 8px;      /* уменьшаем отступы внутри ячейки */
   }
 
   h1 {
-    margin: 20px;
+    margin-left: 20px;
+    color: #2c2c2c;
   }
 
   table {
+    border-left: 20px;
     margin-left: 20px;
     margin-right: 20px;
   }
 
-  dive {
-    margin: 200px;
-    background-color: aliceblue;
-  }
-h2 {
-  margin: 15px;
-  margin-left: 100px;
+header {
+  background-color: #d2d2d2;
+  background-color: #d2d2d2;
+  height: 100px;
+  display: flex;          /* включаем Flexbox */
+  align-items: center;    /* вертикальное центрирование */
 }
