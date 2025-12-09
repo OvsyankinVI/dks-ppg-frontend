@@ -11,7 +11,7 @@ function App() {
 
   return (
     <div>
-      <h1>Паспортная система</h1>
+      <h1>Паспортная система 0.0.2</h1>
       <PassportTable />
     </div>
   );

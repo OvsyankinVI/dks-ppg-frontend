@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { generateDOCX } from "../utils/generateDOCX";
+import { generateDOCXtoZip } from "../utils/generateDOCXtozip";
 
 
 export default function PassportTable() {
@@ -35,15 +36,14 @@ export default function PassportTable() {
     return row.model && row.serial && row.date && row.pressure;
   };
 
-  const downloadPassport = async (row) => {
+  const downloadPassport = (row) => {
     if (!validateRow(row)) {
       alert("Заполните все обязательные поля перед скачиванием!");
       return;
     }
-
     const filename = `Паспорт_${row.serial || Math.random().toString(36).slice(2, 8)}`;
     const data = { type: 'Паспорт', ...row };
-    await generateDOCX(data, filename);
+    generateDOCX(data, filename);
   };
 
   // Множественное скачивание → ZIP
@@ -61,7 +61,7 @@ export default function PassportTable() {
       const filename = `Паспорт_${row.serial || Math.random().toString(36).slice(2,8)}`;
       const data = { type: "Паспорт", ...row };
   
-      const blob = await generateDOCX(data);   // ✔️ теперь это УНИКАЛЬНЫЙ Blob
+      const blob = await generateDOCXtoZip(data);   // ✔️ теперь это УНИКАЛЬНЫЙ Blob
       zip.file(`${filename}.docx`, blob);      // ✔️ кладём в ZIP
     }
   
