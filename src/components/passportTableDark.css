@@ -1,0 +1,65 @@
+:root {
+    --background-color: #1e1e1e;
+    --card-bg: #2a2a2a;
+    --text-color: #e0e0e0;
+    --accent: #4c9aff;
+  }
+  body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+  }
+  nav, footer {
+    background-color: #232323;
+  }
+  .passport-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    table-layout: fixed;
+  }
+  .passport-table th, .passport-table td {
+    border-bottom: 1px solid #3a3a3a;
+    padding: 0.5rem;
+    vertical-align: top;
+    word-wrap: break-word;
+  }
+  .passport-table th {
+    background-color: #333;
+    text-align: left;
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .passport-table tr:hover {
+    background-color: #333;
+  }
+  .controls > * { margin-right: 0.5rem; }
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--accent);
+    color: white;
+    padding: 0.75em 1.25em;
+    border-radius: 6px;
+    opacity: 0;
+    transition: opacity 0.25s ease-in-out;
+    z-index: 9999;
+  }
+  .toast.show { opacity: 1; }
+  .cell-input, .cell-textarea {
+    width: 100%;
+    background: transparent;
+    color: inherit;
+    border: 1px solid transparent;
+    padding: 6px 8px;
+    border-radius: 4px;
+    outline: none;
+  }
+  .cell-input:focus, .cell-textarea:focus { border-color: rgba(76,154,255,0.25); background: rgba(255,255,255,0.02); }
+  .actions-cell { white-space: nowrap; }
+  @media (max-width: 900px) {
+    .passport-table th:nth-child(4), .passport-table td:nth-child(4) { display: none; }
+  }

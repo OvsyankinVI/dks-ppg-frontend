@@ -66,8 +66,6 @@ export default function PassportTable() {
     generateDOCX(row, filename);
   };
 
-
-
   const downloadSelectedPassports = async () => {
   const selected = rows.filter(r => r.selected);
 
@@ -106,8 +104,6 @@ const toggleSelectAll = () => {
   const newRows = rows.map(r => ({ ...r, selected: !allSelected }));
   setRows(newRows);
 };
-
-  
   
   
 
@@ -115,15 +111,45 @@ const toggleSelectAll = () => {
   const pasteFromClipboard = async () => {
     try {
       const text = await navigator.clipboard.readText();
-      if (!text) {
-        alert("Буфер пуст");
+      if (!text.trim()) {
+        alert("Буфер обмена пуст");
         return;
       }
-
-      // Разбиваем текст на строки
-      const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
-      const newRows = lines.map(line => {
-        const cells = line.split(/\t/); // предполагаем, что таблица скопирована с табуляцией
+  
+      // Разбиваем на строки как в Excel
+      let rawLines = text.split(/\r?\n/).filter(l => l.trim() !== "");
+  
+      // Определим реальное количество колонок по первой строке
+      const firstSplit = rawLines[0].split(/\t/);
+      const colCount = firstSplit.length;
+  
+      let joinedRows = [];
+      let buffer = [];
+  
+      for (let line of rawLines) {
+        const cells = line.split(/\t/);
+  
+        if (cells.length === colCount) {
+          // Новая полноценная строка
+          if (buffer.length) {
+            joinedRows.push(buffer.join("\n"));
+            buffer = [];
+          }
+          buffer.push(line);
+        } else {
+          // Продолжение многострочной ячейки
+          buffer.push(line);
+        }
+      }
+  
+      if (buffer.length) {
+        joinedRows.push(buffer.join("\n"));
+      }
+  
+      // Теперь корректно разбираем строки
+      const newRows = joinedRows.map(rowText => {
+        const cells = rowText.split(/\t/);
+  
         return {
           name: cells[0] || "",
           type: cells[1] || "",
@@ -131,36 +157,39 @@ const toggleSelectAll = () => {
           manufacturer: cells[3] || "",
           manufacturerAddress: cells[4] || "",
           serial: cells[5] || "",
-          specs: cells[6] || "",
+          specs: (cells[6] || "").replace(/^"+|"+$/g, ""), // удаляет внешние кавычки
           dateAcceptance: cells[7] || "",
           selected: false
         };
       });
-
-      setRows([...rows, ...newRows]);
-
+  
+      setRows(prev => [...prev, ...newRows]);
+  
     } catch (err) {
       console.error(err);
       alert("Ошибка при вставке данных из буфера обмена");
     }
   };
+  
 
   return (
     <div>
+      {/* <div><h1>Паспортная система</h1></div> */}
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
         <div>
-          <button onClick={() => setSelectMode(!selectMode)}>
+          <button className='btn-main' onClick={() => setSelectMode(!selectMode)}>
             {selectMode ? "Скрыть выбор" : "Выбрать паспорта"}
           </button>
-
-          <button onClick={pasteFromClipboard} style={{ marginLeft: 10 }}>
+          <button className='btn-main' onClick={pasteFromClipboard} style={{ marginLeft: 10 }}>
             Вставить данные
           </button>
+          <button className='btn-main' onClick={addRow}  style={{ marginLeft: 10 }}>Добавить строку</button>
+        <button className='btn-main' onClick={clearTable} style={{ marginLeft: 10 }}>Очистить таблицу</button>
         </div>
       </div>
 
-      <div style={{ maxHeight: "800px", overflowY: "auto" }}>
-        <table style={{ borderCollapse: "collapse", width: "100%" }}>
+      <div style={{ maxHeight: "750px", overflowY: "auto" }}>
+        <table style={{ borderCollapse: "collapse", width: "95%" }}>
           <thead>
             <tr>
               {selectMode && (
@@ -168,7 +197,6 @@ const toggleSelectAll = () => {
                   ☑️
                 </th>
               )}
-
               <th style={{ maxWidth: 120 }}>Наименование*</th>
               <th style={{ maxWidth: 100 }}>Тип/модель/обозн.*</th>
               <th style={{ maxWidth: 80 }}>Код/артикул*</th>
@@ -177,8 +205,7 @@ const toggleSelectAll = () => {
               <th style={{ maxWidth: 100 }}>Серийный номер</th>
               <th style={{ maxWidth: 150 }}>Тех. характеристики*</th>
               <th style={{ maxWidth: 120 }}>Дата приемки*</th>
-              <th>⬇️</th>
-              <th>🗑️</th>
+              <th></th>
             </tr>
           </thead>
 
@@ -206,7 +233,6 @@ const toggleSelectAll = () => {
                     value={r.specs}
                     onChange={e => update(i, "specs", e.target.value)}
                     rows={3}
-                    style={{ width: "100%" }}
                   />
                 </td>
 
@@ -218,26 +244,23 @@ const toggleSelectAll = () => {
                   />
                 </td>
 
-                <td><button onClick={() => downloadPassport(r)}>⬇️</button></td>
-                <td><button onClick={() => removeRow(i)}>🗑️</button></td>
-
-                
+                <td>
+                  <button title="Скачать паспорт" className='btn-action' onClick={() => downloadPassport(r)}>⬇️</button>
+                  <button title="Удалить строку" className='btn-action' onClick={() => removeRow(i)}>🗑️</button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-
-      <div style={{ marginTop: 10 }}>
-        <button onClick={addRow}>Добавить строку</button>
-        <button onClick={clearTable} style={{ marginLeft: 10 }}>Очистить таблицу</button>
-
+      <div style={{ marginLeft: 10 }}>
         {selectMode && (
-          <button onClick={downloadSelectedPassports} style={{ marginLeft: 10 }}>
-            Скачать паспорта
-          </button>
-        )}   
+                    <button className='btn-main' onClick={downloadSelectedPassports} style={{ marginLeft: 10 }}>
+                      Скачать паспорта
+                    </button>
+                  )} 
       </div>
+      
     </div>
   );
 }

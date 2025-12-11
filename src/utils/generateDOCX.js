@@ -15,7 +15,7 @@ export async function generateDOCX(data, filename) {
     styles: {
       default: {
         document: {
-          run: { font: "Times New Roman", size: 22 }
+          run: { font: "Times New Roman", size: 18 }
         }
       },
       paragraphStyles: [
@@ -25,7 +25,7 @@ export async function generateDOCX(data, filename) {
           basedOn: "Normal",
           next: "Normal",
           quickFormat: true,
-          run: { bold: true, font: "Times New Roman", size: 24 },
+          run: { bold: true, font: "Times New Roman", size: 20 },
           paragraph: { spacing: { before: 200, after: 100 } }
         }
       ]
@@ -54,7 +54,7 @@ export async function generateDOCX(data, filename) {
 
           new Paragraph({ text: "2. Основные технические характеристики", style: "Heading2" }),
           // Разбиваем по строкам
-          ...data.specs.split("\n").map(line => new Paragraph(`• ${line}`)),
+          ...data.specs.split("\n").map(line => new Paragraph(`${line}`)),
 
           new Paragraph({ text: "3. Состав и комплектность", style: "Heading2" }),
           new Paragraph(`1. ${data.name} — 1 шт.`),
@@ -66,19 +66,13 @@ export async function generateDOCX(data, filename) {
           new Paragraph("Не превышать предельные нагрузки и температуры."),
           new Paragraph("Избегать агрессивных воздействий."),
 
-          new Paragraph({ text: "5. Требования безопасности", style: "Heading2" }),
-          new Paragraph("Использовать изделие только по назначению."),
-          new Paragraph("Монтаж выполнять обученным персоналом."),
-          new Paragraph("Соблюдать нормы безопасности."),
-          new Paragraph("Применять средства индивидуальной защиты."),
-
-          new Paragraph({ text: "6. Обслуживание и уход", style: "Heading2" }),
+          new Paragraph({ text: "5. Обслуживание и уход", style: "Heading2" }),
           new Paragraph("Регулярно проводить визуальный осмотр изделия."),
           new Paragraph("Очищать от загрязнений безопасными методами."),
           new Paragraph("Проводить плановое техническое обслуживание."),
           new Paragraph("Использовать только рекомендованные материалы и инструменты."),
 
-          new Paragraph({ text: "7. Возможные неисправности и способы их устранения", style: "Heading2" }),
+          new Paragraph({ text: "6. Возможные неисправности и способы их устранения", style: "Heading2" }),
           new Table({
             width: { size: 100, type: "pct" },
             rows: [
@@ -94,19 +88,19 @@ export async function generateDOCX(data, filename) {
             ]
           }),
 
-          new Paragraph({ text: "8. Условия хранения и транспортировки", style: "Heading2" }),
+          new Paragraph({ text: "7. Условия хранения и транспортировки", style: "Heading2" }),
           new Paragraph("Хранить в сухом помещении, защищённом от влаги."),
           new Paragraph("Избегать механических воздействий."),
           new Paragraph("Транспортировать в заводской упаковке."),
           new Paragraph("Избегать вибрации и ударов."),
 
-          new Paragraph({ text: "9. Гарантийные обязательства", style: "Heading2" }),
+          new Paragraph({ text: "8. Гарантийные обязательства", style: "Heading2" }),
           new Paragraph("Изготовитель гарантирует соответствие изделия требованиям."),
           new Paragraph("Гарантийный срок действует с момента передачи изделия."),
           new Paragraph("Гарантия не распространяется на случаи нарушения условий эксплуатации."),
           new Paragraph("Ремонт выполняется уполномоченными организациями."),
 
-          new Paragraph({ text: "10. Отметки о приемке", style: "Heading2" }),
+          new Paragraph({ text: "9. Отметки о приемке", style: "Heading2" }),
           new Paragraph("• Изделие изготовлено и соответствует НТД."),
           new Paragraph(`• Дата приемки: ${data.dateAcceptance}`),
           new Paragraph("• Подпись контролёра ОТК: ________________________"),
