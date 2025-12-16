@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000'
+  baseURL: 'https://dks-ppg-backend.onrender.com' || 'http://localhost:5001'
 });
 
 // interceptor добавляет Authorization если есть token

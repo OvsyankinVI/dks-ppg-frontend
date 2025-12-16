@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import API from '../api/api';
+import logo from "../assets/logo.png";
+
 
 export default function Login({ onLogin }) {
   const [username,setUsername] = useState('');
@@ -17,11 +19,21 @@ export default function Login({ onLogin }) {
   };
 
   return (
-    <div>
-      <h2>Авторизация</h2>
-      <input placeholder="Логин" value={username} onChange={e=>setUsername(e.target.value)} />
-      <input placeholder="Пароль" type="password" value={password} onChange={e=>setPassword(e.target.value)} />
-      <button onClick={submit}>Войти</button>
+     <div>
+      <header className="header">
+            <div className="header-left">
+              <div className="logo">
+                <img src={logo} alt="Логотип" height="40" />  
+              </div>
+              <h2 className="page-title">Documentation</h2>
+            </div>
+      </header>
+      <div className="auth">
+        <h2 className='auth-h2'>Авторизация</h2>
+        <input placeholder="Логин" value={username} onChange={e=>setUsername(e.target.value)} />
+        <input placeholder="Пароль" type="password" value={password} onChange={e=>setPassword(e.target.value)} />
+        <button className='btn-primary' onClick={submit}>Войти</button>
+      </div>
     </div>
   );
 }
