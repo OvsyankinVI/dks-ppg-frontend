@@ -28,11 +28,15 @@ export default function Login({ onLogin }) {
               <h2 className="page-title">Documentation</h2>
             </div>
       </header>
-      <div className="auth">
-        <h2 className='auth-h2'>Авторизация</h2>
-        <input placeholder="Логин" value={username} onChange={e=>setUsername(e.target.value)} />
-        <input placeholder="Пароль" type="password" value={password} onChange={e=>setPassword(e.target.value)} />
-        <button className='btn-primary' onClick={submit}>Войти</button>
+      <div className="auth-container">
+        <div className="auth">
+          <h2 className='auth-h2'>Авторизация</h2>
+            <div className="auth-inputs">
+              <input placeholder="Логин" value={username} onChange={e => setUsername(e.target.value)} />
+              <input placeholder="Пароль" type="password" value={password} onChange={e => setPassword(e.target.value)} />
+            </div>
+            <button className='btn-primary' onClick={submit}>Войти</button>
+        </div>
       </div>
     </div>
   );
