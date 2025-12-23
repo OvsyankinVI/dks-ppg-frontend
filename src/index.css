@@ -332,3 +332,8 @@ input:focus, textarea:focus {
   align-self: stretch;
   margin-top: 10px;
 }
+
+.td_kipia {
+padding-left: 25px;
+padding-right: 25px;
+}

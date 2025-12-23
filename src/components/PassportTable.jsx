@@ -1,28 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
-import { generateDOCX } from "../utils/generateDOCX";
-import { generateDOCXtoZip } from "../utils/generateDOCXtozip";
+import { generateFromTemplate } from "../utils/generateFromTemplate";
 
 export default function PassportTable() {
-  const emptyRow = { 
+
+  const emptyRow = {
+    installationNumber: "",
+    designation: "",
+    isKIP: false,
+
     name: "",
     type: "",
     code: "",
     manufacturer: "",
     manufacturerAddress: "",
     serial: "",
-    purpose: "",
     specs: "",
     dateAcceptance: "",
-    selected: false
+    selected: false,
   };
 
   const [rows, setRows] = useState([{ ...emptyRow }]);
   const [selectMode, setSelectMode] = useState(false);
 
+  /* ==================== CRUD ==================== */
+
   const addRow = () => setRows([...rows, { ...emptyRow }]);
   const clearTable = () => setRows([{ ...emptyRow }]);
+
   const removeRow = (i) => {
     const copy = [...rows];
     copy.splice(i, 1);
@@ -35,176 +41,152 @@ export default function PassportTable() {
     setRows(copy);
   };
 
-  const validateRow = (r) => {
-    return (
-      r.name &&
-      r.type &&
-      r.code &&
-      r.manufacturer &&
-      r.manufacturerAddress &&
-      r.specs &&
-      r.dateAcceptance
-    );
-  };
-  const downloadPassport = (row) => {
+  /* ==================== VALIDATION ==================== */
+
+  const validateRow = (r) => (
+    r.installationNumber &&
+    r.designation &&
+    r.name &&
+    r.type &&
+    r.code &&
+    r.manufacturer &&
+    r.manufacturerAddress &&
+    r.specs &&
+    r.dateAcceptance
+  );
+
+  /* ==================== DOWNLOAD ==================== */
+
+  const downloadPassport = async (row) => {
     if (!validateRow(row)) {
-      alert("Заполните все обязательные поля перед скачиванием!");
+      alert("Заполните все обязательные поля");
       return;
     }
-  
-    // Получаем сегодняшнюю дату в формате YYYYMMDD
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    const dateStr = `${yyyy}${mm}${dd}`;
-  
-    // Формируем уникальное имя файла
-    const filename = `Паспорт_${dateStr}-${row.code}`;
-  
-    // Передаем название внутрь DOCX
-    generateDOCX(row, filename);
+    await generateFromTemplate(row);
   };
 
   const downloadSelectedPassports = async () => {
-  const selected = rows.filter(r => r.selected);
+    const selected = rows.filter(r => r.selected);
 
-  if (!selected.length) {
-    alert("Выберите хотя бы один паспорт");
-    return;
-  }
-
-  const zip = new JSZip();
-
-  // Используем for..of с await вместо map, чтобы избежать проблем с ссылками
-  for (const r of selected) {
-    try {
-      const rowData = { ...r }; // отдельная копия строки
-      const today = new Date();
-      const yyyy = today.getFullYear();
-      const mm = String(today.getMonth() + 1).padStart(2, "0");
-      const dd = String(today.getDate()).padStart(2, "0");
-      const dateStr = `${yyyy}${mm}${dd}`;
-
-      const filename = `Паспорт_${dateStr}-${rowData.code}`;
-      const blob = await generateDOCXtoZip(rowData);
-      zip.file(`${filename}.docx`, blob);
-    } catch (err) {
-      console.error("Ошибка при генерации паспорта:", err);
-      alert(`Не удалось сгенерировать паспорт для ${r.name}`);
+    if (!selected.length) {
+      alert("Выберите хотя бы один паспорт");
+      return;
     }
-  }
 
-  const archive = await zip.generateAsync({ type: "blob" });
-  saveAs(archive, "Паспорта.zip");
-};
+    const zip = new JSZip();
 
-const toggleSelectAll = () => {
-  const allSelected = rows.every(r => r.selected); // проверяем, все ли уже выбраны
-  const newRows = rows.map(r => ({ ...r, selected: !allSelected }));
-  setRows(newRows);
-};
-  
-  
+    for (const r of selected) {
+      if (!validateRow(r)) continue;
 
-  // Новая функция: вставка данных из буфера
+      const blob = await generateFromTemplate(r, true);
+      const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+      zip.file(`Паспорт_${dateStr}-${r.code}.docx`, blob);
+    }
+
+    const archive = await zip.generateAsync({ type: "blob" });
+    saveAs(archive, "Паспорта.zip");
+  };
+
+  const toggleSelectAll = () => {
+    const allSelected = rows.every(r => r.selected);
+    setRows(rows.map(r => ({ ...r, selected: !allSelected })));
+  };
+
+  /* ==================== PASTE FROM CLIPBOARD ==================== */
+
   const pasteFromClipboard = async () => {
     try {
       const text = await navigator.clipboard.readText();
-      if (!text.trim()) {
-        alert("Буфер обмена пуст");
-        return;
-      }
-  
-      // Разбиваем на строки как в Excel
-      let rawLines = text.split(/\r?\n/).filter(l => l.trim() !== "");
-  
-      // Определим реальное количество колонок по первой строке
-      const firstSplit = rawLines[0].split(/\t/);
-      const colCount = firstSplit.length;
-  
-      let joinedRows = [];
+      if (!text.trim()) return;
+
+      const rawLines = text.split(/\r?\n/).filter(l => l.trim() !== "");
+      const colCount = rawLines[0].split(/\t/).length;
+
+      let joined = [];
       let buffer = [];
-  
+
       for (let line of rawLines) {
         const cells = line.split(/\t/);
-  
         if (cells.length === colCount) {
-          // Новая полноценная строка
           if (buffer.length) {
-            joinedRows.push(buffer.join("\n"));
+            joined.push(buffer.join("\n"));
             buffer = [];
           }
           buffer.push(line);
         } else {
-          // Продолжение многострочной ячейки
           buffer.push(line);
         }
       }
-  
-      if (buffer.length) {
-        joinedRows.push(buffer.join("\n"));
-      }
-  
-      // Теперь корректно разбираем строки
-      const newRows = joinedRows.map(rowText => {
+      if (buffer.length) joined.push(buffer.join("\n"));
+
+      const newRows = joined.map(rowText => {
         const cells = rowText.split(/\t/);
-  
         return {
-          name: cells[0] || "",
-          type: cells[1] || "",
-          code: cells[2] || "",
-          manufacturer: cells[3] || "",
-          manufacturerAddress: cells[4] || "",
-          serial: cells[5] || "",
-          specs: (cells[6] || "").replace(/^"+|"+$/g, ""), // удаляет внешние кавычки
-          dateAcceptance: cells[7] || "",
-          selected: false
+          ...emptyRow,
+          installationNumber: cells[0] || "",
+          designation: cells[1] || "",
+          name: cells[2] || "",
+          type: cells[3] || "",
+          code: cells[4] || "",
+          manufacturer: cells[5] || "",
+          manufacturerAddress: cells[6] || "",
+          serial: cells[7] || "",
+          specs: (cells[8] || "").replace(/^"+|"+$/g, ""),
+          dateAcceptance: cells[9] || "",
         };
       });
-  
+
       setRows(prev => [...prev, ...newRows]);
-  
-    } catch (err) {
-      console.error(err);
-      alert("Ошибка при вставке данных из буфера обмена");
+
+    } catch (e) {
+      console.error(e);
+      alert("Ошибка при вставке данных");
     }
   };
-  
+
+  /* ==================== UI ==================== */
 
   return (
     <div>
-      {/* <div><h1>Паспортная система</h1></div> */}
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-        <div>
-          <button className='btn-main' onClick={() => setSelectMode(!selectMode)}>
-            {selectMode ? "Скрыть выбор" : "Выбрать паспорта"}
-          </button>
-          <button className='btn-main' onClick={pasteFromClipboard} style={{ marginLeft: 10 }}>
-            Вставить данные
-          </button>
-          <button className='btn-main' onClick={addRow}  style={{ marginLeft: 10 }}>Добавить строку</button>
-        <button className='btn-main' onClick={clearTable} style={{ marginLeft: 10 }}>Очистить таблицу</button>
-        </div>
+
+      <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
+        <button className="btn-main" onClick={() => setSelectMode(!selectMode)}>
+          {selectMode ? "Скрыть выбор" : "Выбрать паспорта"}
+        </button>
+
+        <button className="btn-main" onClick={pasteFromClipboard}>
+          Вставить данные
+        </button>
+
+        <button className="btn-main" onClick={addRow}>
+          Добавить строку
+        </button>
+
+        <button className="btn-main" onClick={clearTable}>
+          Очистить таблицу
+        </button>
       </div>
 
-      <div style={{ maxHeight: "750px", overflowY: "auto" }}>
-        <table style={{ borderCollapse: "collapse", width: "95%" }}>
+      <div style={{ maxHeight: 750, overflowY: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr>
               {selectMode && (
-                <th onClick={toggleSelectAll} style={{ cursor: "pointer", userSelect: "none" }}>
+                <th onClick={toggleSelectAll} style={{ cursor: "pointer" }}>
                   ☑️
                 </th>
               )}
-              <th style={{ maxWidth: 120 }}>Наименование*</th>
-              <th style={{ maxWidth: 100 }}>Тип/модель/обозн.*</th>
-              <th style={{ maxWidth: 80 }}>Код/артикул*</th>
-              <th style={{ maxWidth: 120 }}>Изготовитель*</th>
-              <th style={{ maxWidth: 150 }}>Адрес изготовителя*</th>
-              <th style={{ maxWidth: 100 }}>Серийный номер</th>
-              <th style={{ maxWidth: 150 }}>Тех. характеристики*</th>
-              <th style={{ maxWidth: 120 }}>Дата приемки*</th>
+              <th>№ установки*</th>
+              <th>Обозначение*</th>
+              <th>КИПиА</th>
+              <th>Наименование*</th>
+              <th>Тип*</th>
+              <th>Артикул*</th>
+              <th>Изготовитель*</th>
+              <th>Адрес изготовителя*</th>
+              <th>Заводской номер</th>
+              <th>Тех. характеристики*</th>
+              <th>Дата приемки*</th>
               <th></th>
             </tr>
           </thead>
@@ -212,7 +194,7 @@ const toggleSelectAll = () => {
           <tbody>
             {rows.map((r, i) => (
               <tr key={i}>
-                  {selectMode && (
+                {selectMode && (
                   <td>
                     <input
                       type="checkbox"
@@ -221,46 +203,39 @@ const toggleSelectAll = () => {
                     />
                   </td>
                 )}
+
+                <td><input value={r.installationNumber} onChange={e => update(i, "installationNumber", e.target.value)} /></td>
+                <td><input value={r.designation} onChange={e => update(i, "designation", e.target.value)} /></td>
+                <td className="td_kipia"><input type="checkbox" checked={r.isKIP} onChange={e => update(i, "isKIP", e.target.checked)} /></td>
                 <td><input value={r.name} onChange={e => update(i, "name", e.target.value)} /></td>
                 <td><input value={r.type} onChange={e => update(i, "type", e.target.value)} /></td>
                 <td><input value={r.code} onChange={e => update(i, "code", e.target.value)} /></td>
                 <td><input value={r.manufacturer} onChange={e => update(i, "manufacturer", e.target.value)} /></td>
                 <td><input value={r.manufacturerAddress} onChange={e => update(i, "manufacturerAddress", e.target.value)} /></td>
                 <td><input value={r.serial} onChange={e => update(i, "serial", e.target.value)} /></td>
-                
                 <td>
                   <textarea
+                    rows={3}
                     value={r.specs}
                     onChange={e => update(i, "specs", e.target.value)}
-                    rows={3}
                   />
                 </td>
-
+                <td><input value={r.dateAcceptance} onChange={e => update(i, "dateAcceptance", e.target.value)} /></td>
                 <td>
-                  <input
-                    type="text"
-                    value={r.dateAcceptance}
-                    onChange={e => update(i, "dateAcceptance", e.target.value)}
-                  />
-                </td>
-
-                <td>
-                  <button title="Скачать паспорт" className='btn-action' onClick={() => downloadPassport(r)}>⬇️</button>
-                  <button title="Удалить строку" className='btn-action' onClick={() => removeRow(i)}>🗑️</button>
+                  <button title="Скачать" onClick={() => downloadPassport(r)}>⬇️</button>
+                  <button title="Удалить" onClick={() => removeRow(i)}>🗑️</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <div style={{ marginLeft: 10 }}>
-        {selectMode && (
-                    <button className='btn-main' onClick={downloadSelectedPassports} style={{ marginLeft: 10 }}>
-                      Скачать паспорта
-                    </button>
-                  )} 
-      </div>
-      
+
+      {selectMode && (
+        <button className="btn-main" onClick={downloadSelectedPassports}>
+          Скачать паспорта
+        </button>
+      )}
     </div>
   );
 }
