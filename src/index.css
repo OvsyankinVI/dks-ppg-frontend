@@ -337,3 +337,67 @@ input:focus, textarea:focus {
 padding-left: 25px;
 padding-right: 25px;
 }
+
+.loader {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #fff;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* ===== Loader (from CodePen, adapted) ===== */
+
+.dot-loader {
+  display: inline-flex;
+  margin-left: 10px;
+}
+
+.dot-loader span {
+  width: 6px;
+  height: 6px;
+  margin: 0 2px;
+  background-color: #fff;
+  border-radius: 50%;
+  animation: dotPulse 1.4s infinite ease-in-out both;
+}
+
+.dot-loader span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+.dot-loader span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes dotPulse {
+  0%, 80%, 100% {
+    transform: scale(0);
+    opacity: 0.3;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.cell-error {
+  border: 2px solid #e53935;
+  background-color: #fff5f5;
+}
+
+.error-animate {
+  animation: pulseError 1.2s ease-in-out;
+}
+
+@keyframes pulseError {
+  0% { box-shadow: 0 0 0 0 rgba(229,57,53,0.6); }
+  50% { box-shadow: 0 0 0 6px rgba(229,57,53,0); }
+  100% { box-shadow: 0 0 0 0 rgba(229,57,53,0); }
+}

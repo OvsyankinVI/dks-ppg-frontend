@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { generateFromTemplate } from "../utils/generateFromTemplate";
+import { toast } from "react-toastify";
 
 export default function PassportTable() {
 
@@ -26,14 +27,23 @@ export default function PassportTable() {
 
   /* ==================== CRUD ==================== */
 
-  const addRow = () => setRows([...rows, { ...emptyRow }]);
-  const clearTable = () => setRows([{ ...emptyRow }]);
+  const addRow = () => {
+    setRows([...rows, { ...emptyRow }]);
+    toast.success("Строка добавлена");
+  };
+  const clearTable = () => {
+    setRows([{ ...emptyRow }]);
+    toast.info("Таблица очищена");
+  };
+  
 
   const removeRow = (i) => {
     const copy = [...rows];
     copy.splice(i, 1);
     setRows(copy.length ? copy : [{ ...emptyRow }]);
+    toast.warn("Строка удалена");
   };
+  
 
   const update = (i, field, value) => {
     const copy = [...rows];
@@ -59,33 +69,44 @@ export default function PassportTable() {
 
   const downloadPassport = async (row) => {
     if (!validateRow(row)) {
-      alert("Заполните все обязательные поля");
+      toast.error("Заполните обязательные поля перед скачиванием паспорта");
       return;
     }
+  
     await generateFromTemplate(row);
+    toast.success("Паспорт успешно скачан");
   };
+  
 
   const downloadSelectedPassports = async () => {
     const selected = rows.filter(r => r.selected);
-
+  
     if (!selected.length) {
-      alert("Выберите хотя бы один паспорт");
+      toast.error("Не выбрано ни одного паспорта");
       return;
     }
-
-    const zip = new JSZip();
-
+  
     for (const r of selected) {
-      if (!validateRow(r)) continue;
-
+      if (!validateRow(r)) {
+        toast.error("В архиве есть паспорта с незаполненными полями");
+        return;
+      }
+    }
+  
+    const zip = new JSZip();
+  
+    for (const r of selected) {
       const blob = await generateFromTemplate(r, true);
       const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
       zip.file(`Паспорт_${dateStr}-${r.code}.docx`, blob);
     }
-
+  
     const archive = await zip.generateAsync({ type: "blob" });
     saveAs(archive, "Паспорта.zip");
+  
+    toast.success("Архив паспортов успешно скачан");
   };
+  
 
   const toggleSelectAll = () => {
     const allSelected = rows.every(r => r.selected);
